@@ -1,0 +1,112 @@
+<!-- Licensed under CC BY-SA:
+http://creativecommons.org/licenses/by-sa/3.0/
+
+Copyright 2011 NitroLab Sp. z o.o.
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Tactile UX prototyping demo</title>
+
+		<!-- Link to XUI, you can also use jqTouch or jQuery -->
+		<script src="js/mylibs/xui-2.0.0.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" media="screen" type="text/css" href="css/style.css" />
+		
+		<!-- Disable gesture scaling of the page -->
+		<meta name="viewport" content="width=device-width, user-scalable=no" />
+	</head>
+	<body>
+
+		<div id="main">
+			<!-- Top bar -->
+			<div id="bar1" class="bar movable only-x">
+			</div>
+			<!-- Ball -->
+			<div id="ball" class="ball scalable rotatable">
+			</div>
+			<!-- Bottom bar -->
+			<div id="bar2" class="bar movable only-x">
+			</div>
+			<!-- Debug window. Uncomment if you'd like to use it.
+			<div id="debug">
+			</div> -->
+		</div><!-- /#main -->
+		<script type="text/javascript">
+			// disable default touch behaviour (which is page scrolling)
+			document.addEventListener('touchmove', function(e) {
+				e.preventDefault();
+			});
+			
+			//init variable needed to calculate drag position
+			var touchdiff = new Object();
+			
+			//handle scaling event
+			x$('.scalable').gesturechange( function(e) {
+				var scale = e.scale;
+				
+				//construct the CSS transform based on event. Use '3d' transforms for best performance
+				var scaleTransform = {
+					"-webkit-transform": "scale3d(" + scale + ", " + scale +", 0)"
+				};
+				
+				//apply CSS property to touched element
+				x$(this).css(scaleTransform);
+				
+				//debug logging
+				x$('#debug').html("Scale: " + scale + "<br>");
+			});
+			
+			//handle rotation event
+			x$('.rotatable').gesturechange( function(e) {
+				var rotation = e.rotation;
+
+				//construct the CSS transform based on event. Use '3d' transforms for best performance
+				var rotationTransform = {
+					"-webkit-transform": "rotate3d(0,0,1, " + rotation +"deg)"
+				};
+
+				//apply CSS property to touched element
+				x$(this).css(rotationTransform);
+
+				//debug logging
+				x$('#debug').html("Rotation: " + rotation + "<br>");
+			});
+			
+			//handle drag event - record initial touch position
+			x$('.movable').touchstart( function(e) {
+				var touch = e.changedTouches[0];
+				touchdiff.startX = touch.pageX;
+				touchdiff.startY = touch.pageY;
+			});
+			
+			//handle drag event - calculate offset and move the element
+			x$('.movable').touchmove( function(e) {
+				var touch = e.changedTouches[0];
+				touchdiff.endX = touch.pageX;
+				touchdiff.endY = touch.pageY;
+
+				//construct the CSS transform based on event. Use '3d' transforms for best performance
+				var transform = {
+					"-webkit-transform": "translate3d(" + (touchdiff.endX - touchdiff.startX) + "px, " + (touchdiff.endY - touchdiff.startY) + "px, 0)"
+				};
+
+				//apply CSS property to touched element
+				x$(this).css(transform);
+			});
+			
+			//handle drag event - overrides previous handler to lock movement only to x-axis
+			x$('.only-x').touchmove( function(e) {
+				var touch = e.changedTouches[0];
+				touchdiff.endX = touch.pageX;
+
+				//construct the CSS transform based on event. Use '3d' transforms for best performance
+				var transform = {
+					"-webkit-transform": "translate3d(" + (touchdiff.endX - touchdiff.startX) + "px, 0px, 0)"
+				};
+				x$(this).css(transform);
+			});
+		</script>
+	</body>
+</html>
